@@ -56,11 +56,12 @@ const getRequestPayment = async () => {
     const instance = await window.loadTossPayments(TOSS_CLIENT_KEY);
     const fn = instance?.requestPayment;
     if (typeof fn === "function") {
-      return (options: unknown) =>
-        (fn as (method: string, payload?: unknown) => Promise<void>)(
-          "CARD",
-          fn.length <= 1 ? { method: "CARD", ...(options as object) } : options,
-        );
+      return (options: unknown) => {
+        if (fn.length <= 1) {
+          return fn({ method: "CARD", ...(options as object) });
+        }
+        return fn("CARD", options);
+      };
     }
   }
 
@@ -68,11 +69,12 @@ const getRequestPayment = async () => {
     const instance = window.TossPayments(TOSS_CLIENT_KEY);
     const fn = instance?.requestPayment;
     if (typeof fn === "function") {
-      return (options: unknown) =>
-        (fn as (method: string, payload?: unknown) => Promise<void>)(
-          "CARD",
-          fn.length <= 1 ? { method: "CARD", ...(options as object) } : options,
-        );
+      return (options: unknown) => {
+        if (fn.length <= 1) {
+          return fn({ method: "CARD", ...(options as object) });
+        }
+        return fn("CARD", options);
+      };
     }
   }
 

@@ -5,8 +5,6 @@
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const TOSS_SECRET_KEY = "test_sk_ORzdMaqN3wxBzK4gNPEYV5AkYXQG";
-
 type ConfirmBody = {
   paymentKey?: string;
   orderId?: string;
@@ -21,13 +19,18 @@ serve(async (req) => {
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
     });
   }
 
   if (req.method !== "POST") {
     return json({ success: false, message: "Method not allowed" }, 405);
+  }
+
+  const secretKey = Deno.env.get("TOSS_SECRET_KEY");
+  if (!secretKey) {
+    return json({ success: false, message: "Missing TOSS_SECRET_KEY" }, 500);
   }
 
   let payload: ConfirmBody;
@@ -46,7 +49,7 @@ serve(async (req) => {
   }
 
   try {
-    const auth = "Basic " + btoa(`${TOSS_SECRET_KEY}:`);
+    const auth = "Basic " + btoa(`${secretKey}:`);
     const tossRes = await fetch("https://api.tosspayments.com/v1/payments/confirm", {
       method: "POST",
       headers: {
